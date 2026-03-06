@@ -192,33 +192,30 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
     }
   };
 
-  const baixarCurriculoPDF = async () => {
+  const baixarCurriculoPDF = () => {
     if (!curriculoRef.current) return;
-    toast.info("Gerando PDF...");
-    try {
-      const element = curriculoRef.current;
-      // Temporarily remove scroll constraints for full capture
-      const originalMaxH = element.style.maxHeight;
-      const originalOverflow = element.style.overflow;
-      element.style.maxHeight = "none";
-      element.style.overflow = "visible";
-
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: "curriculo-otimizado.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
-      await html2pdf().set(opt).from(element).save();
-
-      // Restore constraints
-      element.style.maxHeight = originalMaxH;
-      element.style.overflow = originalOverflow;
-      toast.success("PDF baixado com sucesso!");
-    } catch {
-      toast.error("Erro ao gerar o PDF.");
+    const html = curriculoRef.current.innerHTML;
+    const janela = window.open("", "_blank");
+    if (!janela) {
+      toast.error("Não foi possível abrir a janela. Verifique o bloqueador de pop-ups.");
+      return;
     }
+    janela.document.write(`
+      <html><head><meta charset="utf-8"><title>Currículo</title>
+      <style>
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; line-height: 1.6; color: #1a1a1a; padding: 40px; background: #fff; }
+        h2 { font-size: 20pt; font-weight: bold; text-align: center; margin-bottom: 4px; letter-spacing: 1px; }
+        h3 { font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; margin-bottom: 8px; }
+        hr { border: none; border-top: 1px solid #999; margin: 16px 0; }
+        p { margin: 2px 0; }
+        a { color: #1a1a1a; text-decoration: underline; }
+        @media print { body { padding: 20px; } }
+      </style>
+      </head><body>${html}</body></html>
+    `);
+    janela.document.close();
+    janela.focus();
+    setTimeout(() => janela.print(), 500);
   };
 
   const gerarHtmlEstilizado = () => {
