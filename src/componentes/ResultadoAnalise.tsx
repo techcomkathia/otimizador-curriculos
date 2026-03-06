@@ -31,7 +31,6 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
   };
 
   const baixarCurriculoPDF = () => {
-    // Simulação de download - será implementado com backend
     const blob = new Blob([curriculoGerado], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -40,6 +39,22 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
     link.click();
     URL.revokeObjectURL(url);
     toast.success("Download iniciado! (Versão PDF será disponibilizada em breve)");
+  };
+
+  const baixarCurriculoDoc = () => {
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>Currículo</title>
+      <style>body { font-family: Calibri, sans-serif; font-size: 12pt; line-height: 1.5; white-space: pre-wrap; }</style>
+      </head><body>${curriculoGerado.replace(/\n/g, "<br>")}</body></html>`;
+    const blob = new Blob(['\ufeff', htmlContent], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "curriculo-otimizado.doc";
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Download do arquivo .doc iniciado!");
   };
 
   return (
