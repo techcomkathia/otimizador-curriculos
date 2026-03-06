@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Send, Loader2, Briefcase, User, Code, GraduationCap, Globe, FolderOpen, Download, Upload } from "lucide-react";
 import { DadosAnalise, InformacoesContato } from "@/servicos/servicoApi";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 interface DadosPerfil {
   informacoesContato: InformacoesContato;
@@ -136,41 +137,48 @@ const FormularioAnalise = ({ aoEnviar, carregando }: PropriedadesFormulario) => 
   return (
     <form onSubmit={enviarFormulario} className="space-y-6">
       {/* Importar / Exportar JSON */}
-      <div className="cartao-secao">
-        <div className="flex items-center gap-2 mb-3">
-          <Upload className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-bold text-foreground">Reutilizar Perfil</h2>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Importe um JSON de perfil salvo anteriormente para preencher os campos automaticamente,
-          ou exporte seus dados atuais para reutilizar em futuras vagas.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="botao-secundario"
-            onClick={() => referenciaInputArquivo.current?.click()}
-          >
-            <Upload className="h-4 w-4" />
-            Importar perfil (JSON)
-          </button>
-          <button
-            type="button"
-            className="botao-secundario"
-            onClick={gerarJsonPerfil}
-          >
-            <Download className="h-4 w-4" />
-            Exportar perfil (JSON)
-          </button>
-          <input
-            ref={referenciaInputArquivo}
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={importarJsonPerfil}
-          />
-        </div>
-      </div>
+      <Collapsible className="cartao-secao">
+        <CollapsibleTrigger className="flex items-center justify-between w-full py-2 hover:opacity-80 transition-opacity">
+          <div className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-bold text-foreground">Reutilizar Perfil</h2>
+          </div>
+          <svg className="h-5 w-5 text-primary transition-transform duration-200 data-[state=open]:rotate-180" data-state="closed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-4">
+          <p className="text-sm text-muted-foreground mb-4">
+            Importe um JSON de perfil salvo anteriormente para preencher os campos automaticamente,
+            ou exporte seus dados atuais para reutilizar em futuras vagas.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="botao-secundario"
+              onClick={() => referenciaInputArquivo.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              Importar perfil (JSON)
+            </button>
+            <button
+              type="button"
+              className="botao-secundario"
+              onClick={gerarJsonPerfil}
+            >
+              <Download className="h-4 w-4" />
+              Exportar perfil (JSON)
+            </button>
+            <input
+              ref={referenciaInputArquivo}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={importarJsonPerfil}
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Descrição da Vaga */}
       <div className="cartao-secao">
