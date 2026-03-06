@@ -2,6 +2,7 @@ import { CheckCircle, XCircle, Lightbulb, FileText, Copy, Download } from "lucid
 import { ResultadoAnaliseDTO } from "@/servicos/servicoApi";
 import { toast } from "sonner";
 import { useMemo } from "react";
+import html2pdf from "html2pdf.js";
 
 interface PropriedadesResultado {
   resultado: ResultadoAnaliseDTO;
@@ -289,17 +290,28 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
   const baixarCurriculoPDF = () => {
     const corpoHtml = gerarHtmlCurriculo(curriculoGerado);
     const documentoHtml = gerarDocumentoCompleto(corpoHtml, "pdf");
-    const janela = window.open("", "_blank");
-    if (janela) {
-      janela.document.write(documentoHtml);
-      janela.document.close();
-      setTimeout(() => {
-        janela.print();
-      }, 300);
-      toast.success("Janela de impressão aberta! Selecione 'Salvar como PDF'.");
-    } else {
-      toast.error("Não foi possível abrir a janela de impressão. Verifique o bloqueador de pop-ups.");
-    }
+
+    const container = document.createElement("div");
+    container.innerHTML = documentoHtml;
+    document.body.appendChild(container);
+
+    html2pdf()
+      .set({
+        margin: [15, 15, 15, 15],
+        filename: "curriculo-otimizado.pdf",
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(container)
+      .save()
+      .then(() => {
+        document.body.removeChild(container);
+        toast.success("Download do PDF iniciado!");
+      })
+      .catch(() => {
+        document.body.removeChild(container);
+        toast.error("Erro ao gerar o PDF.");
+      });
   };
 
   const baixarCurriculoDoc = () => {
