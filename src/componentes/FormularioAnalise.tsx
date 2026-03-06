@@ -1,6 +1,17 @@
-import { useState } from "react";
-import { Send, Loader2, Briefcase, User, Code, GraduationCap, Globe, FolderOpen } from "lucide-react";
+import { useState, useRef } from "react";
+import { Send, Loader2, Briefcase, User, Code, GraduationCap, Globe, FolderOpen, Download, Upload } from "lucide-react";
 import { DadosAnalise, InformacoesContato } from "@/servicos/servicoApi";
+import { toast } from "sonner";
+
+interface DadosPerfil {
+  informacoesContato: InformacoesContato;
+  resumoProfissional: string;
+  habilidadesUsuario: string;
+  experienciaProfissional: string;
+  formacaoAcademica: string;
+  projetosUsuario: string;
+  idiomas: string;
+}
 
 interface PropriedadesFormulario {
   aoEnviar: (dados: DadosAnalise) => void;
@@ -22,6 +33,78 @@ const FormularioAnalise = ({ aoEnviar, carregando }: PropriedadesFormulario) => 
   const [formacaoAcademica, setFormacaoAcademica] = useState("");
   const [projetosUsuario, setProjetosUsuario] = useState("");
   const [idiomas, setIdiomas] = useState("");
+
+  const referenciaInputArquivo = useRef<HTMLInputElement>(null);
+
+  const carregarDadosPerfil = (dados: DadosPerfil) => {
+    const { informacoesContato } = dados;
+    setNomeCompleto(informacoesContato.nomeCompleto || "");
+    setEmail(informacoesContato.email || "");
+    setTelefone(informacoesContato.telefone || "");
+    setCidadeEstado(informacoesContato.cidadeEstado || "");
+    setPerfilLinkedin(informacoesContato.perfilLinkedin || "");
+    setPerfilGithub(informacoesContato.perfilGithub || "");
+    setSitePortifolio(informacoesContato.sitePortifolio || "");
+    setResumoProfissional(dados.resumoProfissional || "");
+    setHabilidadesUsuario(dados.habilidadesUsuario || "");
+    setExperienciaProfissional(dados.experienciaProfissional || "");
+    setFormacaoAcademica(dados.formacaoAcademica || "");
+    setProjetosUsuario(dados.projetosUsuario || "");
+    setIdiomas(dados.idiomas || "");
+  };
+
+  const gerarJsonPerfil = () => {
+    const dadosPerfil: DadosPerfil = {
+      informacoesContato: {
+        nomeCompleto,
+        email,
+        telefone,
+        cidadeEstado,
+        perfilLinkedin,
+        perfilGithub,
+        sitePortifolio,
+      },
+      resumoProfissional,
+      habilidadesUsuario,
+      experienciaProfissional,
+      formacaoAcademica,
+      projetosUsuario,
+      idiomas,
+    };
+
+    const jsonTexto = JSON.stringify(dadosPerfil, null, 2);
+    const blob = new Blob([jsonTexto], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `perfil-${nomeCompleto.replace(/\s+/g, "-").toLowerCase() || "usuario"}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("JSON do perfil exportado com sucesso!");
+  };
+
+  const importarJsonPerfil = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+    leitor.onload = (e) => {
+      try {
+        const dados = JSON.parse(e.target?.result as string) as DadosPerfil;
+        if (!dados.informacoesContato) {
+          toast.error("Formato de JSON inválido. Verifique o arquivo.");
+          return;
+        }
+        carregarDadosPerfil(dados);
+        toast.success("Perfil importado! Agora cole a nova descrição de vaga.");
+      } catch {
+        toast.error("Erro ao ler o arquivo JSON. Verifique o formato.");
+      }
+    };
+    leitor.readAsText(arquivo);
+    // Reset para permitir reimportar o mesmo arquivo
+    evento.target.value = "";
+  };
 
   const enviarFormulario = (evento: React.FormEvent) => {
     evento.preventDefault();
@@ -52,6 +135,43 @@ const FormularioAnalise = ({ aoEnviar, carregando }: PropriedadesFormulario) => 
 
   return (
     <form onSubmit={enviarFormulario} className="space-y-6">
+      {/* Importar / Exportar JSON */}
+      <div className="cartao-secao">
+        <div className="flex items-center gap-2 mb-3">
+          <Upload className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-bold text-foreground">Reutilizar Perfil</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Importe um JSON de perfil salvo anteriormente para preencher os campos automaticamente,
+          ou exporte seus dados atuais para reutilizar em futuras vagas.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            className="botao-secundario"
+            onClick={() => referenciaInputArquivo.current?.click()}
+          >
+            <Upload className="h-4 w-4" />
+            Importar perfil (JSON)
+          </button>
+          <button
+            type="button"
+            className="botao-secundario"
+            onClick={gerarJsonPerfil}
+          >
+            <Download className="h-4 w-4" />
+            Exportar perfil (JSON)
+          </button>
+          <input
+            ref={referenciaInputArquivo}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={importarJsonPerfil}
+          />
+        </div>
+      </div>
+
       {/* Descrição da Vaga */}
       <div className="cartao-secao">
         <div className="flex items-center gap-2 mb-4">
