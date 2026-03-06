@@ -1,10 +1,171 @@
 import { CheckCircle, XCircle, Lightbulb, FileText, Copy, Download } from "lucide-react";
 import { ResultadoAnaliseDTO } from "@/servicos/servicoApi";
 import { toast } from "sonner";
+import { useMemo } from "react";
 
 interface PropriedadesResultado {
   resultado: ResultadoAnaliseDTO;
 }
+
+const renderizarCurriculoEstilizado = (texto: string) => {
+  const linhas = texto.split("\n");
+  const elementos: React.ReactNode[] = [];
+  let ehPrimeiraLinha = true;
+
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i].trim();
+
+    // Linha separadora
+    if (linha.match(/^[━─═─]{5,}$/)) {
+      elementos.push(
+        <hr key={i} className="border-t border-muted-foreground/30 my-5" />
+      );
+      continue;
+    }
+
+    // Linha vazia
+    if (linha === "") {
+      elementos.push(<div key={i} className="h-2" />);
+      continue;
+    }
+
+    // Nome da pessoa (primeira linha não-vazia)
+    if (ehPrimeiraLinha && linha.length > 0) {
+      ehPrimeiraLinha = false;
+      elementos.push(
+        <h2 key={i} className="text-2xl font-bold tracking-wide text-center mb-1">
+          {linha}
+        </h2>
+      );
+      continue;
+    }
+
+    // Títulos de seção (tudo em maiúsculo, sem dois pontos)
+    if (linha === linha.toUpperCase() && linha.length > 3 && !linha.includes(":") && !linha.startsWith("•") && !linha.startsWith("–") && !linha.match(/^\d/)) {
+      elementos.push(
+        <h3 key={i} className="text-lg font-bold uppercase tracking-widest mt-1 mb-2">
+          {linha}
+        </h3>
+      );
+      continue;
+    }
+
+    // Linha de contato (segunda linha, com email/telefone)
+    if (i <= 2 && (linha.includes("@") || linha.includes("(")) && !linha.startsWith("•")) {
+      const partes = linha.split("|").map((p) => p.trim());
+      elementos.push(
+        <p key={i} className="text-xs text-center mb-1 opacity-80">
+          {partes.join("  ·  ")}
+        </p>
+      );
+      continue;
+    }
+
+    // Linha com LinkedIn/GitHub
+    if ((linha.toLowerCase().includes("linkedin") || linha.toLowerCase().includes("github")) && !linha.startsWith("•")) {
+      const partes = linha.split("|").map((p) => p.trim());
+      elementos.push(
+        <p key={i} className="text-xs text-center mb-1 opacity-80">
+          {partes.map((parte, j) => {
+            const urlMatch = parte.match(/(linkedin\.com\/\S+|github\.com\/\S+)/i);
+            if (urlMatch) {
+              const url = urlMatch[1];
+              const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+              return (
+                <span key={j}>
+                  {j > 0 && "  ·  "}
+                  <a
+                    href={fullUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:opacity-70 transition-opacity"
+                  >
+                    {url}
+                  </a>
+                </span>
+              );
+            }
+            return <span key={j}>{j > 0 && "  ·  "}{parte}</span>;
+          })}
+        </p>
+      );
+      continue;
+    }
+
+    // Cargo | Empresa (linha com pipe indicando cargo)
+    if (linha.includes("|") && !linha.startsWith("•") && !linha.includes("@")) {
+      const partes = linha.split("|").map((p) => p.trim());
+      // Verifica se parece cargo (ex: "Desenvolvedor... | Empresa...")
+      const pareceData = partes.some(p => p.match(/(Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro|\d{4})/i));
+      if (pareceData) {
+        // Linha de data/período
+        elementos.push(
+          <p key={i} className="text-xs opacity-70 mb-2">
+            {linha}
+          </p>
+        );
+      } else {
+        elementos.push(
+          <p key={i} className="font-bold text-sm mt-2">
+            {linha}
+          </p>
+        );
+      }
+      continue;
+    }
+
+    // Linhas de período/data
+    if (linha.match(/(Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro|Presente|\d{4}\s*[–-])/i) && !linha.startsWith("•")) {
+      elementos.push(
+        <p key={i} className="text-xs opacity-70 mb-2">
+          {linha}
+        </p>
+      );
+      continue;
+    }
+
+    // Bullet points
+    if (linha.startsWith("•") || linha.startsWith("-")) {
+      elementos.push(
+        <p key={i} className="text-sm pl-2 mb-1 leading-relaxed">
+          {linha}
+        </p>
+      );
+      continue;
+    }
+
+    // Categorias de habilidades (Linguagens:, Frameworks:, etc.)
+    if (linha.includes(":") && linha.indexOf(":") < 30) {
+      const [categoria, ...resto] = linha.split(":");
+      const valor = resto.join(":").trim();
+      elementos.push(
+        <p key={i} className="text-sm mb-1">
+          <span className="font-bold">{categoria}:</span> {valor}
+        </p>
+      );
+      continue;
+    }
+
+    // Resumo profissional (parágrafo longo) - texto justificado
+    if (linha.length > 80) {
+      elementos.push(
+        <p key={i} className="text-sm leading-relaxed text-justify">
+          {linha}
+        </p>
+      );
+      continue;
+    }
+
+    // Texto padrão
+    elementos.push(
+      <p key={i} className="text-sm leading-relaxed">
+        {linha}
+      </p>
+    );
+  }
+
+  return elementos;
+};
 
 const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
   const { pontuacaoATS, habilidadesIdentificadas, habilidadesFaltantes, sugestoesMelhoria, curriculoGerado } = resultado;
