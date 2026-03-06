@@ -198,14 +198,24 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
     toast.info("Gerando PDF...");
     try {
       const element = curriculoRef.current;
+      // Temporarily remove scroll constraints for full capture
+      const originalMaxH = element.style.maxHeight;
+      const originalOverflow = element.style.overflow;
+      element.style.maxHeight = "none";
+      element.style.overflow = "visible";
+
       const opt = {
         margin: [10, 10, 10, 10],
         filename: "curriculo-otimizado.pdf",
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
       await html2pdf().set(opt).from(element).save();
+
+      // Restore constraints
+      element.style.maxHeight = originalMaxH;
+      element.style.overflow = originalOverflow;
       toast.success("PDF baixado com sucesso!");
     } catch {
       toast.error("Erro ao gerar o PDF.");
