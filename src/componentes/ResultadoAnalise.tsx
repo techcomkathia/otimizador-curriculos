@@ -1,7 +1,8 @@
 import { CheckCircle, XCircle, Lightbulb, FileText, Copy, Download } from "lucide-react";
 import { ResultadoAnaliseDTO } from "@/servicos/servicoApi";
 import { toast } from "sonner";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import html2pdf from "html2pdf.js";
 
 interface PropriedadesResultado {
   resultado: ResultadoAnaliseDTO;
@@ -169,6 +170,7 @@ const renderizarCurriculoEstilizado = (texto: string) => {
 
 const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
   const { pontuacaoATS, habilidadesIdentificadas, habilidadesFaltantes, sugestoesMelhoria, curriculoGerado } = resultado;
+  const curriculoRef = useRef<HTMLDivElement>(null);
 
   const corPontuacao = pontuacaoATS >= 75
     ? "bg-sucesso"
@@ -191,23 +193,55 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
     }
   };
 
-  const baixarCurriculoPDF = () => {
-    const blob = new Blob([curriculoGerado], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "curriculo-otimizado.txt";
-    link.click();
-    URL.revokeObjectURL(url);
-    toast.success("Download iniciado! (Versão PDF será disponibilizada em breve)");
+  const baixarCurriculoPDF = async () => {
+    if (!curriculoRef.current) return;
+    toast.info("Gerando PDF...");
+    try {
+      const element = curriculoRef.current;
+      // Temporarily remove scroll constraints for full capture
+      const originalMaxH = element.style.maxHeight;
+      const originalOverflow = element.style.overflow;
+      element.style.maxHeight = "none";
+      element.style.overflow = "visible";
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: "curriculo-otimizado.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      await html2pdf().set(opt).from(element).save();
+
+      // Restore constraints
+      element.style.maxHeight = originalMaxH;
+      element.style.overflow = originalOverflow;
+      toast.success("PDF baixado com sucesso!");
+    } catch {
+      toast.error("Erro ao gerar o PDF.");
+    }
+  };
+
+  const gerarHtmlEstilizado = () => {
+    if (!curriculoRef.current) return "";
+    const html = curriculoRef.current.innerHTML;
+    return `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>Currículo</title>
+      <style>
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; line-height: 1.6; color: #1a1a1a; padding: 40px; }
+        h2 { font-size: 20pt; font-weight: bold; text-align: center; margin-bottom: 4px; letter-spacing: 1px; }
+        h3 { font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; margin-bottom: 8px; }
+        hr { border: none; border-top: 1px solid #999; margin: 16px 0; }
+        p { margin: 2px 0; }
+        a { color: #1a1a1a; text-decoration: underline; }
+      </style>
+      </head><body>${html}</body></html>`;
   };
 
   const baixarCurriculoDoc = () => {
-    const htmlContent = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-      <head><meta charset="utf-8"><title>Currículo</title>
-      <style>body { font-family: Calibri, sans-serif; font-size: 12pt; line-height: 1.5; white-space: pre-wrap; }</style>
-      </head><body>${curriculoGerado.replace(/\n/g, "<br>")}</body></html>`;
+    const htmlContent = gerarHtmlEstilizado();
+    if (!htmlContent) return;
     const blob = new Blob(['\ufeff', htmlContent], { type: "application/msword" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -300,7 +334,7 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
           <FileText className="h-5 w-5 text-primary" />
           <h3 className="text-base font-bold text-foreground">Currículo Gerado</h3>
         </div>
-        <div className="bg-card border border-border rounded-lg p-8 font-mono text-foreground max-h-[700px] overflow-y-auto">
+        <div ref={curriculoRef} className="bg-white border border-border rounded-lg p-8 font-mono text-[#1a1a1a] max-h-[700px] overflow-y-auto">
           {renderizarCurriculoEstilizado(curriculoGerado)}
         </div>
         <div className="flex flex-wrap gap-3 mt-4">
