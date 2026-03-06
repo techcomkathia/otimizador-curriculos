@@ -300,8 +300,8 @@ const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
           <FileText className="h-5 w-5 text-primary" />
           <h3 className="text-base font-bold text-foreground">Currículo Gerado</h3>
         </div>
-        <div className="bg-card border border-border rounded-lg p-6 font-mono text-sm text-foreground whitespace-pre-wrap leading-relaxed max-h-[600px] overflow-y-auto">
-          {curriculoGerado}
+        <div className="bg-card border border-border rounded-lg p-8 font-mono text-foreground max-h-[700px] overflow-y-auto">
+          {renderizarCurriculoEstilizado(curriculoGerado)}
         </div>
         <div className="flex flex-wrap gap-3 mt-4">
           <button type="button" className="botao-secundario" onClick={copiarCurriculo}>
