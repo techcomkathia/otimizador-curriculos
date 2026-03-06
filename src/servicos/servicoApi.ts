@@ -54,7 +54,7 @@ function simularRespostaBackend(): ResultadoAnaliseDTO {
     ],
     curriculoGerado: `JOÃO SILVA
 São Paulo, SP | joao.silva@email.com | (11) 99999-0000
-linkedin.com/in/joaosilva | github.com/joaosilva
+LinkedIn: linkedin.com/in/joaosilva | GitHub: github.com/joaosilva
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
