@@ -15,6 +15,7 @@ const PaginaPrincipal = () => {
 
     try {
       const resultado = await analisarCurriculo(dadosAnalise);
+      console.log('Resultado recebido da API:', resultado);
       setResultadoAnalise(resultado);
       toast.success("Análise concluída com sucesso!");
 

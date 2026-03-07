@@ -168,7 +168,13 @@ const renderizarCurriculoEstilizado = (texto: string) => {
 };
 
 const ResultadoAnalise = ({ resultado }: PropriedadesResultado) => {
-  const { pontuacaoATS, habilidadesIdentificadas, habilidadesFaltantes, sugestoesMelhoria, curriculoGerado } = resultado;
+  const {
+    pontuacaoATS,
+    habilidadesIdentificadas = [],
+    habilidadesFaltantes = [],
+    sugestoesMelhoria = [],
+    curriculoGerado = ""
+  } = resultado || {};
   const curriculoRef = useRef<HTMLDivElement>(null);
 
   const corPontuacao = pontuacaoATS >= 75

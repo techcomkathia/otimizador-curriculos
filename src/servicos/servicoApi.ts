@@ -105,18 +105,25 @@ Espanhol – Intermediário`,
 
 export async function analisarCurriculo(
   dadosAnalise: DadosAnalise
-): Promise<ResultadoAnaliseDTO> {
-  // Simula delay de rede
-  await new Promise((resolver) => setTimeout(resolver, 2000));
-
-  // No futuro será substituído por:
-  // const resposta = await fetch('/api/analisar-curriculo', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(dadosAnalise),
-  // });
-  // return resposta.json();
-
-  console.log("Dados enviados para análise:", dadosAnalise);
-  return simularRespostaBackend();
+): Promise<any> {
+  const { informacoesContato } = dadosAnalise;
+  const informacoesPessoais = `Nome: ${informacoesContato.nomeCompleto}\nE-mail: ${informacoesContato.email}\nTelefone: ${informacoesContato.telefone}\nCidade/Estado: ${informacoesContato.cidadeEstado}\nLinkedIn: ${informacoesContato.perfilLinkedin}\nGitHub: ${informacoesContato.perfilGithub}\nPortfólio: ${informacoesContato.sitePortifolio}`;
+  const resposta = await fetch('/api/analisar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      informacoesPessoais,
+      resumoProfissional: dadosAnalise.resumoProfissional,
+      habilidades: dadosAnalise.habilidadesUsuario,
+      experienciaProfissional: dadosAnalise.experienciaProfissional,
+      formacaoAcademica: dadosAnalise.formacaoAcademica,
+      projetos: dadosAnalise.projetosUsuario,
+      idiomas: dadosAnalise.idiomas,
+      descricaoVaga: dadosAnalise.descricaoVaga,
+    }),
+  });
+  if (!resposta.ok) {
+    throw new Error('Erro ao analisar currículo');
+  }
+  return resposta.json();
 }
