@@ -1,7 +1,11 @@
 
-# ATS Resume Optimizer
+# Otimizador de Currículo
 
-🚀 Otimize seu currículo para vagas tech com inteligência artificial e aumente suas chances em processos seletivos!
+🚀 Otimize seu currículo para vagas com inteligência artificial e aumente suas chances em processos seletivos!
+
+<div align="center">
+	<img src="public/telasResponsivas.png" alt="Telas Responsivas - Apresentação do Projeto" width="80%" />
+</div>
 
 ## ✨ Visão Geral
 
@@ -36,9 +40,37 @@ O ATS Resume Optimizer é uma aplicação web que compara seu currículo com a d
 	 - Currículo otimizado
 3. Baixe ou copie o currículo pronto para enviar!
 
-## 🖼️ Demonstração
+### ⚙️ Como o projeto funciona na prática
 
+O ATS Resume Optimizer permite que você preencha seu currículo, importe dados de experiências anteriores via JSON, analise sua compatibilidade com vagas específicas e exporte o resultado em diferentes formatos. A interface é intuitiva e responsiva, facilitando o uso tanto em desktop quanto em dispositivos móveis. O sistema utiliza inteligência artificial para comparar seu perfil com a vaga desejada, sugerindo melhorias e gerando um currículo otimizado, pronto para ser enviado aos recrutadores.
+
+Você pode:
+- Preencher ou importar seu perfil;
+- Analisar e receber sugestões automáticas;
+- Exportar seu currículo otimizado;
+- Visualizar o resultado final de forma clara e prática.
 <!-- Adicione um GIF ou print da interface aqui -->
+
+### 🔄 Recurso de reaproveitar o perfil (utilizar JSON)
+<div align="center">
+	<img src="public/telaJson.png" alt="Recurso de Reaproveitar Perfil - JSON" width="70%" />
+</div>
+
+---
+
+### 📤 Recurso de exportar o perfil
+<div align="center">
+	<img src="public/exportarJson.png" alt="Exportar Perfil em JSON" width="70%" />
+</div>
+
+---
+
+### 📝 Resultado final da análise e exportação do currículo gerado
+<div align="center">
+	<img src="public/resultadoAnalise.png" alt="Resultado da Análise e Exportação do Currículo" width="80%" />
+</div>
+
+---
 
 ## 🚀 Deploy
 
@@ -56,6 +88,8 @@ npm run dev
 # Acesse http://localhost:8080
 ```
 
+
+---
 
 
 ## 🔑 Configuração de APIs e Ambiente
