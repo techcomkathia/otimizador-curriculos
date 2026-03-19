@@ -7,6 +7,7 @@
   },
   "routes": [
     { "src": "/api/analisar", "dest": "api/analisar.ts" },
+    { "src": "/(.*\\.(js|css|png|jpg|svg|ico|json|txt|woff2?))", "dest": "/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
